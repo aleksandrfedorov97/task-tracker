@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -19,8 +20,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public Flux<User> findAllById(Set<String> ids) {
+        return userRepository.findAllById(ids);
+    }
+
     public Mono<User> findById(String id) {
         return userRepository.findById(id);
+    }
+
+    public Mono<Boolean> existsById(String id) {
+        return userRepository.existsById(id);
     }
 
     public Mono<User> create(User user) {
