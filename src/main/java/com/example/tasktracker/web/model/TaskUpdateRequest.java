@@ -1,0 +1,13 @@
+package com.example.tasktracker.web.model;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class TaskUpdateRequest {
+    @NotBlank(message = "Task name cannot be empty!")
+    private String name;
+    private String description;
+    private String status;
+    private String assignedId;
+}
