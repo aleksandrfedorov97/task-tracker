@@ -97,14 +97,14 @@ public class TaskService {
                 });
     }
 
-    public Mono<Task> addAssignee(String taskId, String assigneeId) {
+    public Mono<Task> addObserver(String taskId, String observerId) {
         return findById(taskId).flatMap(
                 task -> {
-                    return userService.findById(assigneeId).flatMap(user -> {
+                    return userService.findById(observerId).flatMap(user -> {
                         task.getObserverIds().add(user.getId());
                         return taskRepository.save(task).flatMap(this::loadRelatedEntities);
                     }).switchIfEmpty(
-                            Mono.error(new EntityNotFoundException(MessageFormat.format("User with Id: {0} not found!", task.getAssignedId())))
+                            Mono.error(new EntityNotFoundException(MessageFormat.format("User with Id: {0} not found!", observerId)))
                     );
                 }
         );

@@ -2,7 +2,7 @@ package com.example.tasktracker.web.controller;
 
 import com.example.tasktracker.service.TaskService;
 import com.example.tasktracker.web.mapper.TaskMapper;
-import com.example.tasktracker.web.model.TaskAddAssigneeRequest;
+import com.example.tasktracker.web.model.TaskAddObserverRequest;
 import com.example.tasktracker.web.model.TaskCreateRequest;
 import com.example.tasktracker.web.model.TaskResponse;
 import com.example.tasktracker.web.model.TaskUpdateRequest;
@@ -57,9 +57,9 @@ public class TaskController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/assignee/{id}")
-    public Mono<ResponseEntity<TaskResponse>> addAssignee(@RequestBody @Valid TaskAddAssigneeRequest request, @PathVariable String id) {
-        return taskService.addAssignee(id, request.getAssigneeId())
+    @PutMapping("/observer/{id}")
+    public Mono<ResponseEntity<TaskResponse>> addObserver(@RequestBody @Valid TaskAddObserverRequest request, @PathVariable String id) {
+        return taskService.addObserver(id, request.getObserverId())
                 .map(taskMapper::taskToTaskResponse)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());

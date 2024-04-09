@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class TaskAddAssigneeRequest {
+public class TaskAddObserverRequest {
     @NotBlank
-    private String assigneeId;
+    private String observerId;
 }
