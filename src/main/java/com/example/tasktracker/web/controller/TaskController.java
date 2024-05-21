@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,11 +31,13 @@ public class TaskController {
     private final TaskMapper taskMapper;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public Flux<TaskResponse> findAll() {
         return taskService.findAll().map(taskMapper::taskToTaskResponse);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public Mono<ResponseEntity<TaskResponse>> findById(@PathVariable String id) {
         return taskService.findById(id)
                 .map(taskMapper::taskToTaskResponse)
@@ -43,6 +46,7 @@ public class TaskController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_MANAGER')")
     public Mono<ResponseEntity<TaskResponse>> create(@RequestBody @Valid TaskCreateRequest request) {
         return taskService.create(taskMapper.taskCreateRequestToTask(request))
                 .map(taskMapper::taskToTaskResponse)
@@ -50,6 +54,7 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGER')")
     public Mono<ResponseEntity<TaskResponse>> update(@RequestBody @Valid TaskUpdateRequest request, @PathVariable String id) {
         return taskService.update(taskMapper.taskUpdateRequestToTask(id, request))
                 .map(taskMapper::taskToTaskResponse)
@@ -58,6 +63,7 @@ public class TaskController {
     }
 
     @PutMapping("/observer/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
     public Mono<ResponseEntity<TaskResponse>> addObserver(@RequestBody @Valid TaskAddObserverRequest request, @PathVariable String id) {
         return taskService.addObserver(id, request.getObserverId())
                 .map(taskMapper::taskToTaskResponse)
@@ -66,6 +72,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_MANAGER')")
     public Mono<ResponseEntity<Void>> delete(@PathVariable String id) {
         return taskService.delete(id).then(Mono.just(ResponseEntity.noContent().build()));
     }
