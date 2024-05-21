@@ -4,8 +4,11 @@ import com.example.tasktracker.exception.EntityNotFoundException;
 import com.example.tasktracker.model.Task;
 import com.example.tasktracker.model.User;
 import com.example.tasktracker.repository.TaskRepository;
+import com.example.tasktracker.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
@@ -32,6 +35,10 @@ public class TaskService {
     }
 
     public Mono<Task> create(Task task) {
+        Mono<UserDetailsImpl> userDetailsMono = ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(auth -> (UserDetailsImpl) auth.getPrincipal());
+
         task.setId(UUID.randomUUID().toString());
         task.setCreatedAt(Instant.now());
         task.setUpdatedAt(task.getCreatedAt());
@@ -40,24 +47,10 @@ public class TaskService {
             task.setStatus(Task.TaskStatus.TODO);
         }
 
-        Mono<Boolean> assignee = Mono.just(true);
-
-        if(task.getAssignedId() != null) {
-            assignee = userService.existsById(task.getAssignedId());
-        }
-
-        return Mono.zip(
-                userService.existsById(task.getAuthorId()),
-                assignee
-        ).flatMap(
-                data -> {
-                    if (!data.getT1()) {
-                        throw new EntityNotFoundException(MessageFormat.format("User with Id: {0} not found!", task.getAuthorId()));
-                    }
-
-                    if (!data.getT2()) {
-                        throw new EntityNotFoundException(MessageFormat.format("User with Id: {0} not found!", task.getAssignedId()));
-                    }
+        return userDetailsMono.flatMap(
+                userDetails -> {
+                    task.setAuthorId(userDetails.getUser().getId());
+                    task.setAssignedId(userDetails.getUser().getId());
 
                     return taskRepository.save(task).flatMap(this::loadRelatedEntities);
                 }
